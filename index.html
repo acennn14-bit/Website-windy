@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake</title>
+    <link rel="stylesheet" href="STYLE.css">
+    <link rel="icon" href="data:,">
+</head>
+<body>
+    <H1 class="neonText">Snake</H1>
+    <div id="scoreBroad">
+        <span class="neonText">Score : <span id="score">0</span></span>
+        <span class="neonText">Best Score: <span id="bestScore">0</span></span>
+       </div> 
+   <canvas id="gamecanvas" width="400" height="400"></canvas>
+
+   <button id="startBtn">Star Game</button>
+
+ <div id="gameOverPopup">
+    <h2 class="neonText">Game Over</h2>
+    <p class="neonText">Your Score :</p> <span id="finalScore"></span></p>
+       <button id="RestartBtn">Restart</button>
+
+  </div>
+   
+    <script src="index.js"></script>
+
+ 
+</body>
+</html>
