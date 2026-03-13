@@ -1,162 +1,194 @@
-let play = document.getElementById("play");
-let progressBar = document.getElementById("progressBar");
-
-let audio = new Audio("turbo.mp3");
-let currentSong = 1;
-
-play.addEventListener("click", ()  =>{
-    if(audio. paused || audio.currentTime ==0){
-        audio.play();
-         play.classList.remove("fa-circle-play");
-         play.classList.add("fa-circle-pause");
-    } else{
-    audio.pause();
-    play.classList.remove ("fa-circle-pause");
-     play.classList.add("fa-circle-play");
+class Snake {
+    constructor(gridSize) {
+        this.gridSize = gridSize;
+        this.reset();
     }
-});
 
+    reset() {
+        this.body = [{ x: 10, y: 10 }];
+        this.direction = { x: 1, y: 0 };
+    }
 
-audio.addEventListener ('timeupdate', () => {
-    let progress = (audio.currentTime/audio.duration) * 100;
-    progressBar.value = progress;
-    progressBar.style.background = `linear-gradient(to right, #21a600ff ${progress}%, #333 ${progress}%)`;
-});
+    move() {
+        const head = {
+            x: this.body[0].x + this.direction.x,
+            y: this.body[0].y + this.direction.y
+        };
 
+        this.body.unshift(head);
+    }
 
-progressBar.addEventListener("input",function ()  {
-    let value = this.value;
-    this.style.background = `linear-gradient(to right, #21a600ff ${value}%, #333 ${value}%)`;
-      audio.currentTime = (progressBar.value * audio.duration) / 100;
-});
+    grow() {
+        // tidak hapus ekor → snake bertambah panjang
+    }
 
+    setDirection(dx, dy) {
+        if (
+            (dx !== 0 && this.direction.x === 0) ||
+            (dy !== 0 && this.direction.y === 0)
+        ) {
+            this.direction = { x: dx, y: dy };
+        }
+    }
 
-let AllMusic = Array.from (document.getElementsByClassName('music-card'));
+    checkCollision(tileCount) {
+        const head = this.body[0];
 
-let songs = [
-  { id: "1", file: "music1.mp3" },
-  { id: "2", file: "music2.mp3" },
-  { id: "3", file: "music3.mp3" },
-  { id: "4", file: "music4.mp3" },
-  { id: "5", file: "music5.mp3" },
-  { id: "6", file: "music6.mp3" },
-  { id: "7", file: "music7.mp3" },
-  { id: "8", file: "music8.mp3" },
-  { id: "9", file: "music9.mp3" },
-  { id: "10", file: "music10.mp3" },
-  { id: "11", file: "music11.mp3" },
-  { id: "12", file: "music12.mp3" },
-  { id: "13", file: "music13.mp3" },
-  { id: "14", file: "music14.mp3" },
-  { id: "15", file: "music15.mp3" },
-  { id: "16", file: "music16.mp3" }
-];
+        // Tabrak dinding
+        if (
+            head.x < 0 ||
+            head.x >= tileCount ||
+            head.y < 0 ||
+            head.y >= tileCount
+        ) {
+            return true;
+        }
 
+        // Tabrak diri sendiri
+        for (let i = 1; i < this.body.length; i++) {
+            if (
+                head.x === this.body[i].x &&
+                head.y === this.body[i].y
+            ) {
+                return true;
+            }
+        }
 
+        return false;
+    }
 
+    draw(ctx) {
+        ctx.fillStyle = "#0f0";
+        ctx.strokeStyle = "#000";
 
+        this.body.forEach(segment => {
+            ctx.fillRect(
+                segment.x * this.gridSize,
+                segment.y * this.gridSize,
+                this.gridSize - 2,
+                this.gridSize - 2
+            );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-makeAllPlay = () => {
-    playMusic.forEach((element) => {
-    element.addEventListener('click', (e) => {
-        element.classList.remove("fa-circle-play");
-        element.classList.add("fa-circle-pause");
-       
-
-    })
-})
-
+            ctx.strokeRect(
+                segment.x * this.gridSize,
+                segment.y * this.gridSize,
+                this.gridSize - 2,
+                this.gridSize - 2
+            );
+        });
+    }
 }
 
+class Food {
+    constructor(gridSize, tileCount) {
+        this.gridSize = gridSize;
+        this.tileCount = tileCount;
+        this.generate();
+    }
 
+    generate() {
+        this.position = {
+            x: Math.floor(Math.random() * this.tileCount),
+            y: Math.floor(Math.random() * this.tileCount)
+        };
+    }
 
+    draw(ctx) {
+        ctx.fillStyle = "#0ff";
 
-playMusic.forEach((element) => {
-    element.addEventListener('click', (e) => {
-        makeAllPlay();
-        e.target.classList.remove("fa-circle-play");
-        e.target.classList.add("fa-circle-pause");
-        play.classList.remove("fa-circle-play");
-        play.classList.add("fa-circle-pause");
-
-
-        
-
-           indexe = parseInt(e.target.id);
-           currentSong = index;
-           audio.src = `turbo.${index}.mp3` ;
-           audio.currentTime = 0;
-           audio.play();
-    })
-})
-
-playNextSong = () =>{
-    let nextSong = (currentSong + 1) % playMusic.length;
-    currentSong = nexSong == 0 ? 18 : nextSong;
-    io.src = `turbo.${currentSong}.mp3`;
-    audio.currentTime = 0;
-    audio.play ();
+        ctx.fillRect(
+            this.position.x * this.gridSize,
+            this.position.y * this.gridSize,
+            this.gridSize - 2,
+            this.gridSize - 2
+        );
+    }
 }
 
+class Game {
+    constructor() {
+        this.canvas = document.getElementById("gamecanvas");
+        this.ctx = this.canvas.getContext("2d");
 
-playPrevsong = () => {
-let nextSong = (currentSong - 1);
-    currentSong = prevSong == 0 ? 18 : nextSong;
-    io.src = `turbo.${currentSong}.mp3`;
-    audio.currentTime = 0;
-    audio.play ();     
+        this.gridSize = 20;
+        this.tileCount = this.canvas.width / this.gridSize;
+
+        this.snake = new Snake(this.gridSize);
+        this.food = new Food(this.gridSize, this.tileCount);
+
+        this.score = 0;
+        this.gameLoop = null;
+
+        this.bindEvents();
+        this.start();
+    }
+
+    bindEvents() {
+        document.addEventListener("keydown", e => {
+            switch (e.key) {
+                case "ArrowUp":
+                    this.snake.setDirection(0, -1);
+                    break;
+                case "ArrowDown":
+                    this.snake.setDirection(0, 1);
+                    break;
+                case "ArrowLeft":
+                    this.snake.setDirection(-1, 0);
+                    break;
+                case "ArrowRight":
+                    this.snake.setDirection(1, 0);
+                    break;
+            }
+        });
+    }
+
+    start() {
+        this.snake.reset();
+        this.food.generate();
+        this.score = 0;
+
+        if (this.gameLoop) {
+            clearInterval(this.gameLoop);
+        }
+
+        this.gameLoop = setInterval(() => this.update(), 100);
+    }
+
+    update() {
+        this.clearCanvas();
+
+        this.snake.move();
+
+        const head = this.snake.body[0];
+
+        // Cek makan
+        if (
+            head.x === this.food.position.x &&
+            head.y === this.food.position.y
+        ) {
+            this.snake.grow();
+            this.food.generate();
+            this.score++;
+        } else {
+            this.snake.body.pop();
+        }
+
+        // Cek tabrakan
+        if (this.snake.checkCollision(this.tileCount)) {
+            alert("Game Over! Score: " + this.score);
+            this.start();
+            return;
+        }
+
+        this.snake.draw(this.ctx);
+        this.food.draw(this.ctx);
+    }
+
+    clearCanvas() {
+        this.ctx.fillStyle = "#000";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
 }
 
-forward = document.getElementById("forward");
-backward = document.getElementById("backward");
-
-
-forward.addEventListener(`click`, () => {
-  playNextSong();
-})
-
-audio.addEventListener ('ended', () => {
-
-})
-
-backward.addEventListener('click', () => {
-
-})
+// Jalankan game
+new Game();
